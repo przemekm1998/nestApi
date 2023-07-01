@@ -8,6 +8,7 @@ import { AuthConfigInterface } from '../configuration/interfaces';
 import { IUser } from '../@types';
 import { Request } from 'express';
 import * as jwtConstants from './auth.constants';
+import { UsersService } from '../users/users.service';
 
 function jwtCookieExtractor(): JwtFromRequestFunction {
   return (req: Request): string | null => {
@@ -31,17 +32,18 @@ export class JwtApiStrategy extends PassportStrategy(Strategy, 'jwtApi') {
   constructor(
     private authService: AuthService,
     private configService: ConfigService,
+    private usersService: UsersService,
   ) {
     const authConfig = configService.get<AuthConfigInterface>('auth');
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: jwtExtractors,
       ignoreExpiration: false,
       secretOrKey: authConfig.jwtSecret,
     });
   }
 
   async validate(payload: AccessTokenPayloadInterface): Promise<IUser> {
-    const user = await this.authService.getUserFromTokenPayload(payload);
+    const user = await this.usersService.findOne(payload.id);
     if (!user) {
       throw new UnauthorizedException();
     }

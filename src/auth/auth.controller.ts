@@ -19,10 +19,18 @@ import * as authConstants from './auth.constants';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
 import { AuthErrors } from './auth.constants';
 import { UserEntity } from '../users/users.entity';
+import { RefreshTokenPayloadInterface } from '../../dist/auth/auth.interfaces';
+import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '../users/users.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService, private authUtils: AuthUtils) {}
+  constructor(
+    private authService: AuthService,
+    private authUtils: AuthUtils,
+    private jwtService: JwtService,
+    private usersService: UsersService,
+  ) {}
 
   @Post('login')
   @HttpCode(200)
@@ -54,8 +62,10 @@ export class AuthController {
       throw new BadRequestException(AuthErrors.REFRESH_TOKEN_MISSING);
     }
 
-    const payload = this.authService.getPayloadFromToken(refreshToken);
-    const user = await this.authService.getUserFromTokenPayload(payload);
+    const payload = this.jwtService.decode(
+      refreshToken,
+    ) as RefreshTokenPayloadInterface;
+    const user = await this.usersService.findOne(payload.id);
     const tokenData = this.authService.generateToken(user);
 
     this.authUtils.setAuthCookies(res, tokenData);

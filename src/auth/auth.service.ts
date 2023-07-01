@@ -42,12 +42,6 @@ export class AuthService {
     };
   }
 
-  async getUserFromTokenPayload(
-    payload: RefreshTokenPayloadInterface,
-  ): Promise<IUser> {
-    return await this.userService.findOne(payload.id);
-  }
-
   async signup(email: string, password: string): Promise<IUser> {
     const users = await this.userService.find({ email });
 
@@ -64,13 +58,5 @@ export class AuthService {
     });
 
     return user;
-  }
-
-  getPayloadFromToken(refreshToken: string): RefreshTokenPayloadInterface {
-    const decodedPayload = this.jwtService.decode(refreshToken);
-
-    return {
-      id: decodedPayload['id'],
-    };
   }
 }
