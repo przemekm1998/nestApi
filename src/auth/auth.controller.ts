@@ -19,7 +19,7 @@ import * as authConstants from './auth.constants';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
 import { AuthErrors } from './auth.constants';
 import { UserEntity } from '../users/users.entity';
-import { RefreshTokenPayloadInterface } from '../../dist/auth/auth.interfaces';
+import { RefreshTokenPayloadInterface } from './auth.interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 
