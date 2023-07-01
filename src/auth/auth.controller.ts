@@ -22,6 +22,7 @@ import { UserEntity } from '../users/users.entity';
 import { RefreshTokenPayloadInterface } from './auth.interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
+import { JwtApiAuthGuard } from './jwt-api.auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -75,6 +76,7 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(200)
+  @UseGuards(JwtApiAuthGuard)
   async logout(@Res({ passthrough: true }) res: Response) {
     // const refreshToken = this.authUtils.getRefreshToken(req, body);
     // blacklist token
