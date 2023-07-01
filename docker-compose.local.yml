@@ -1,0 +1,20 @@
+version: "3.1"
+
+volumes:
+  db_data: {}
+
+services:
+  db:
+    env_file:
+      - .env
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  backend:
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    ports:
+      - "3000:3000"
+      - "9229:9229"
