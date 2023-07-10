@@ -5,7 +5,7 @@ import { UserEntity } from './users.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 
-type UserFindParams = {
+export type UserFindParams = {
   email?: string;
 };
 

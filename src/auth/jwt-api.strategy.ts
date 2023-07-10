@@ -30,7 +30,6 @@ export const jwtExtractors = ExtractJwt.fromExtractors([
 @Injectable()
 export class JwtApiStrategy extends PassportStrategy(Strategy, 'jwtApi') {
   constructor(
-    private authService: AuthService,
     private configService: ConfigService,
     private usersService: UsersService,
   ) {
