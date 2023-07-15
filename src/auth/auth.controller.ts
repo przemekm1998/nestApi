@@ -19,10 +19,19 @@ import * as authConstants from './auth.constants';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
 import { AuthErrors } from './auth.constants';
 import { UserEntity } from '../users/users.entity';
+import { RefreshTokenPayloadInterface } from './auth.interfaces';
+import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '../users/users.service';
+import { JwtApiAuthGuard } from './jwt-api.auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService, private authUtils: AuthUtils) {}
+  constructor(
+    private authService: AuthService,
+    private authUtils: AuthUtils,
+    private jwtService: JwtService,
+    private usersService: UsersService,
+  ) {}
 
   @Post('login')
   @HttpCode(200)
@@ -36,7 +45,7 @@ export class AuthController {
 
   @Post('signup')
   @UseInterceptors(ClassSerializerInterceptor)
-  @HttpCode(200)
+  @HttpCode(201)
   async createUser(@Body() body: CreateUserDto): Promise<UserEntity> {
     return await this.authService.signup(body.email, body.password);
   }
@@ -54,8 +63,10 @@ export class AuthController {
       throw new BadRequestException(AuthErrors.REFRESH_TOKEN_MISSING);
     }
 
-    const payload = this.authService.getPayloadFromToken(refreshToken);
-    const user = await this.authService.getUserFromTokenPayload(payload);
+    const payload = this.jwtService.decode(
+      refreshToken,
+    ) as RefreshTokenPayloadInterface;
+    const user = await this.usersService.findOne(payload.id);
     const tokenData = this.authService.generateToken(user);
 
     this.authUtils.setAuthCookies(res, tokenData);
@@ -65,6 +76,7 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(200)
+  @UseGuards(JwtApiAuthGuard)
   async logout(@Res({ passthrough: true }) res: Response) {
     // const refreshToken = this.authUtils.getRefreshToken(req, body);
     // blacklist token

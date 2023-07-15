@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -42,17 +42,11 @@ export class AuthService {
     };
   }
 
-  async getUserFromTokenPayload(
-    payload: RefreshTokenPayloadInterface,
-  ): Promise<IUser> {
-    return await this.userService.findOne(payload.id);
-  }
-
   async signup(email: string, password: string): Promise<IUser> {
     const users = await this.userService.find({ email });
 
     if (users.length) {
-      throw new Error(AuthErrors.USER_ALREADY_EXISTS);
+      throw new BadRequestException(AuthErrors.USER_ALREADY_EXISTS);
     }
 
     const salt = await bcrypt.genSalt();
@@ -64,13 +58,5 @@ export class AuthService {
     });
 
     return user;
-  }
-
-  getPayloadFromToken(refreshToken: string): RefreshTokenPayloadInterface {
-    const decodedPayload = this.jwtService.decode(refreshToken);
-
-    return {
-      id: decodedPayload['id'],
-    };
   }
 }
