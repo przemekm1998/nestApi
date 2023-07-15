@@ -45,7 +45,7 @@ export class AuthController {
 
   @Post('signup')
   @UseInterceptors(ClassSerializerInterceptor)
-  @HttpCode(200)
+  @HttpCode(201)
   async createUser(@Body() body: CreateUserDto): Promise<UserEntity> {
     return await this.authService.signup(body.email, body.password);
   }

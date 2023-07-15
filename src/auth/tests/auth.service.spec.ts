@@ -1,51 +1,27 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { IUser } from 'src/@types';
-import { CreateUserDto } from 'src/users/dtos/create-user.dto';
 import { AuthService } from '../auth.service';
-import { UsersService, UserFindParams } from '../../users/users.service';
+import { UsersService } from '../../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { BadRequestException } from '@nestjs/common';
+import { UserMockFactory } from '../../users/tests/factories';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { UserEntity } from '../../users/users.entity';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let fakeUsersService: Partial<UsersService>;
 
   beforeEach(async () => {
-    const users: IUser[] = [];
-    fakeUsersService = {
-      find: (params?: UserFindParams) => {
-        let filteredUsers: IUser[] = [];
-
-        if (params) {
-          filteredUsers = users.filter((user) => user.email === params.email);
-        } else {
-          filteredUsers = users;
-        }
-
-        return Promise.resolve(filteredUsers);
-      },
-      create: (data: CreateUserDto): Promise<IUser> => {
-        const user = {
-          id: users.length,
-          email: data.email,
-          password: data.password,
-          isDeleted: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        users.push(user);
-
-        return Promise.resolve(user);
-      },
-    };
+    const userMockFactory = new UserMockFactory();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         JwtService,
         ConfigService,
-        { provide: UsersService, useValue: fakeUsersService },
+        UsersService,
+        { provide: getRepositoryToken(UserEntity), useValue: userMockFactory },
       ],
     }).compile();
 

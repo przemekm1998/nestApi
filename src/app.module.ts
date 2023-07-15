@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, ValidationPipe } from '@nestjs/common';
+import { APP_PIPE } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -7,12 +8,16 @@ import configuration from './configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DbConfigInterface } from './configuration/interfaces';
+import * as cookieParser from 'cookie-parser';
+import config from './configuration';
 
 @Module({
   imports: [
     UsersModule,
     AuthModule,
     ConfigModule.forRoot({
+      envFilePath: process.env.NODE_ENV === 'test' ? ['.env.test'] : '.',
+      ignoreEnvFile: process.env.NODE_ENV !== 'test',
       load: [configuration],
       isGlobal: true,
     }),
@@ -28,6 +33,14 @@ import { DbConfigInterface } from './configuration/interfaces';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_PIPE, useValue: new ValidationPipe() },
+  ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    const conf = config();
+    consumer.apply(cookieParser(conf.auth.jwtSecret)).forRoutes('*');
+  }
+}
