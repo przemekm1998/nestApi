@@ -8,6 +8,7 @@ import configuration from './configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DbConfigInterface } from './configuration/interfaces';
+import { ReportsModule } from './reports/reports.module';
 import * as cookieParser from 'cookie-parser';
 import config from './configuration';
 
@@ -31,6 +32,7 @@ import config from './configuration';
       }),
       inject: [ConfigService],
     }),
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [
