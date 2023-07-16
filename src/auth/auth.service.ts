@@ -10,13 +10,13 @@ import { IUser } from '../@types';
 import { ConfigService } from '@nestjs/config';
 import { RefreshTokenPayloadInterface } from './auth.interfaces';
 import { AuthErrors } from './auth.constants';
+import { UserEntity } from '../users/users.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UsersService,
     private jwtService: JwtService,
-    private configService: ConfigService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<IUser | null> {
@@ -42,7 +42,7 @@ export class AuthService {
     };
   }
 
-  async signup(email: string, password: string): Promise<IUser> {
+  async signup(email: string, password: string): Promise<UserEntity> {
     const users = await this.userService.find({ email });
 
     if (users.length) {
@@ -52,11 +52,9 @@ export class AuthService {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = await this.userService.create({
+    return await this.userService.create({
       email: email,
       password: hashedPassword,
     });
-
-    return user;
   }
 }

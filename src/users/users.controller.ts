@@ -15,6 +15,7 @@ import { UserEntity } from './users.entity';
 import { JwtApiAuthGuard } from '../auth/jwt-api.auth.guard';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UsersService } from './users.service';
+import { CurrentUser } from '../common/common.decorators';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -23,8 +24,8 @@ export class UsersController {
 
   @Get('me')
   @UseGuards(JwtApiAuthGuard)
-  me(@Req() req: Request): UserEntity {
-    return req.user;
+  me(@CurrentUser() user: UserEntity): UserEntity {
+    return user;
   }
 
   @Get(':id')
