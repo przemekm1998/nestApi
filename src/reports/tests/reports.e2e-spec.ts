@@ -5,7 +5,7 @@ import { AppModule } from '../../app.module';
 import { CreateReportDto } from '../dtos/create-report.dto';
 import { AuthService } from '../../auth/auth.service';
 import { IUser } from '../../@types';
-import { CreateUserDto } from '../../users/dtos/create-user.dto';
+import { CreateUserDto } from '../../users/dtos';
 import { TokenDataInterface } from '../../auth/auth.interfaces';
 
 describe('ReportsController (e2e)', () => {
@@ -58,13 +58,21 @@ describe('ReportsController (e2e)', () => {
       .send(reportData)
       .expect(201)
       .then((res) => {
-        const { id, make, model, year, price, mileage } = res.body;
+        const { id, make, model, year, price, mileage, user } = res.body;
+
         expect(id).toBeDefined();
         expect(make).toEqual(reportData.make);
         expect(model).toEqual(reportData.model);
         expect(year).toEqual(reportData.year);
         expect(price).toEqual(reportData.price);
         expect(mileage).toEqual(reportData.mileage);
+
+        expect(user).toMatchObject({
+          id: user.id,
+          email: user.email,
+          createdAt: user.createdAt,
+          updatedAt: user.upadtedAt,
+        });
       });
   });
 });

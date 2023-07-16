@@ -9,9 +9,10 @@ import {
 import { CreateReportDto } from './dtos/create-report.dto';
 import { ReportsService } from './reports.service';
 import { JwtApiAuthGuard } from '../auth/jwt-api.auth.guard';
-import { CurrentUser } from '../common/decorators';
+import { CurrentUser, Serialize } from '../common/decorators';
 import { UserEntity } from '../users/users.entity';
 import { ReportEntity } from './reports.entity';
+import { ReadReportDto } from './dtos/read-report.dto';
 
 @Controller('reports')
 export class ReportsController {
@@ -20,10 +21,11 @@ export class ReportsController {
   @Post()
   @UseGuards(JwtApiAuthGuard)
   @HttpCode(HttpStatus.CREATED)
+  @Serialize(ReadReportDto)
   async createReport(
     @Body() body: CreateReportDto,
     @CurrentUser() user: UserEntity,
-  ): Promise<ReportEntity> {
+  ) {
     return await this.reportsService.create(body, user);
   }
 }
