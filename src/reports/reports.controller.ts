@@ -9,7 +9,7 @@ import {
 import { CreateReportDto } from './dtos/create-report.dto';
 import { ReportsService } from './reports.service';
 import { JwtApiAuthGuard } from '../auth/jwt-api.auth.guard';
-import { CurrentUser } from '../common/common.decorators';
+import { CurrentUser } from '../common/decorators';
 import { UserEntity } from '../users/users.entity';
 import { ReportEntity } from './reports.entity';
 

@@ -1,6 +1,5 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from '../common/common.entity';
-import { Exclude } from 'class-transformer';
 import { ReportEntity } from '../reports/reports.entity';
 
 @Entity()
@@ -12,7 +11,6 @@ export class UserEntity extends BaseEntity {
   email: string;
 
   @Column()
-  @Exclude()
   password: string;
 
   constructor(partial: Partial<UserEntity>) {
