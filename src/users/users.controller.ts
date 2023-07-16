@@ -13,8 +13,10 @@ import {
 import { Request } from 'express';
 import { UserEntity } from './users.entity';
 import { JwtApiAuthGuard } from '../auth/jwt-api.auth.guard';
-import { UpdateUserDto } from './dtos/update-user.dto';
+import { UpdateUserDto, ReadUserDto, ListUserDto } from './dtos';
 import { UsersService } from './users.service';
+import { CurrentUser } from '../common/decorators';
+import { Serialize } from '../common/decorators';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -23,24 +25,28 @@ export class UsersController {
 
   @Get('me')
   @UseGuards(JwtApiAuthGuard)
-  me(@Req() req: Request): UserEntity {
-    return req.user;
+  @Serialize(ReadUserDto)
+  me(@CurrentUser() user: UserEntity) {
+    return user;
   }
 
   @Get(':id')
   @UseGuards(JwtApiAuthGuard)
+  @Serialize(ListUserDto)
   async findUser(@Param('id') id: string) {
     return this.usersService.findOne(parseInt(id));
   }
 
   @Get()
   @UseGuards(JwtApiAuthGuard)
+  @Serialize(ListUserDto)
   async findAllUsers(@Query('email') email: string) {
     return this.usersService.find({ email });
   }
 
   @Patch('update')
   @UseGuards(JwtApiAuthGuard)
+  @Serialize(ReadUserDto)
   async update(
     @Req() req: Request,
     @Body() body: UpdateUserDto,

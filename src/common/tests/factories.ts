@@ -17,12 +17,31 @@ export abstract class MockFactory<Entity extends BaseEntity, CreateDto> {
     return Promise.resolve(filteredEntities[0]);
   }
 
-  abstract create(data: CreateDto): Entity;
+  create(data: CreateDto): Entity {
+    return {
+      id: this.storage.length,
+      createdAt: new Date(),
+      updatedAt: null,
+      isDeleted: false,
+      ...data,
+    } as unknown as Entity;
+  }
 
   save(entity: Entity) {
     this.storage.push(entity);
     return entity;
   }
 
-  abstract find(params?: FindManyOptions<Entity>): Entity[];
+  find(params?: FindManyOptions<Entity>): Entity[] {
+    return this.storage.filter((entity) => {
+      // iterate over params.where object attributes
+      for (const key in params.where) {
+        if (entity[key] !== params.where[key]) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }
 }

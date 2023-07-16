@@ -7,13 +7,11 @@ import {
   Res,
   BadRequestException,
   HttpCode,
-  UseInterceptors,
-  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { LocalLoginAuthGuard } from './local-login.auth.guard';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from '../users/dtos/create-user.dto';
+import { CreateUserDto } from '../users/dtos';
 import { AuthUtils } from './auth.utils';
 import * as authConstants from './auth.constants';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
@@ -23,6 +21,8 @@ import { RefreshTokenPayloadInterface } from './auth.interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { JwtApiAuthGuard } from './jwt-api.auth.guard';
+import { Serialize } from '../common/decorators';
+import { ReadUserDto } from '../users/dtos';
 
 @Controller('auth')
 export class AuthController {
@@ -44,7 +44,7 @@ export class AuthController {
   }
 
   @Post('signup')
-  @UseInterceptors(ClassSerializerInterceptor)
+  @Serialize(ReadUserDto)
   @HttpCode(201)
   async createUser(@Body() body: CreateUserDto): Promise<UserEntity> {
     return await this.authService.signup(body.email, body.password);
