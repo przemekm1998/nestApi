@@ -2,11 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../../app.module';
-import { CreateReportDto } from '../dtos/create-report.dto';
+import { CreateReportDto } from '../dtos';
 import { AuthService } from '../../auth/auth.service';
-import { IUser } from '../../@types';
 import { CreateUserDto } from '../../users/dtos';
 import { TokenDataInterface } from '../../auth/auth.interfaces';
+import { ReportsService } from '../reports.service';
+import { UserEntity } from '../../users/users.entity';
 
 describe('ReportsController (e2e)', () => {
   let app: INestApplication;
@@ -21,13 +22,14 @@ describe('ReportsController (e2e)', () => {
   };
 
   let authService: AuthService;
+  let reportsService: ReportsService;
   let authTokens: TokenDataInterface;
 
   const userData: CreateUserDto = {
     email: 'mail@mail.com',
     password: 'password',
   };
-  let user: IUser;
+  let user: UserEntity;
 
   let agent: request.SuperAgentTest;
 
@@ -37,6 +39,8 @@ describe('ReportsController (e2e)', () => {
     }).compile();
 
     authService = moduleFixture.get<AuthService>(AuthService);
+    reportsService = moduleFixture.get<ReportsService>(ReportsService);
+
     user = await authService.signup(userData.email, userData.password);
     authTokens = await authService.generateToken(user);
 
@@ -71,7 +75,59 @@ describe('ReportsController (e2e)', () => {
           id: user.id,
           email: user.email,
           createdAt: user.createdAt,
-          updatedAt: user.upadtedAt,
+          updatedAt: user.updatedAt,
+        });
+      });
+  });
+
+  it('/reports (GET) throws error for anonymous user', async () => {
+    return agent.get('/reports').expect(401);
+  });
+
+  it('/reports (GET) returns list of reports', async () => {
+    const report = await reportsService.create(reportData, user);
+
+    agent.auth(authTokens.access, { type: 'bearer' });
+
+    return agent
+      .get('/reports')
+      .expect(200)
+      .then((res) => {
+        expect(res.body.length).toEqual(1);
+        expect(res.body[0]).toMatchObject({
+          id: report.id,
+          price: report.price,
+          make: report.make,
+          model: report.model,
+          year: report.year,
+        });
+      });
+  });
+
+  it('/reports/:id (GET) throws error for anonymous user', async () => {
+    return agent.get('/reports/1').expect(401);
+  });
+
+  it('/reports/:id (GET) returns report instance', async () => {
+    const report = await reportsService.create(reportData, user);
+
+    agent.auth(authTokens.access, { type: 'bearer' });
+
+    return agent
+      .get(`/reports/${report.id}`)
+      .expect(200)
+      .then((res) => {
+        expect(res.body).toMatchObject({
+          createdAt: report.createdAt,
+          updatedAt: report.updatedAt,
+          id: report.id,
+          price: report.price,
+          make: report.make,
+          model: report.model,
+          year: report.year,
+          lng: report.lng,
+          lat: report.lat,
+          mileage: report.mileage,
         });
       });
   });

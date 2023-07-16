@@ -1,5 +1,5 @@
 import { ReadEntityDto } from '../../common/dtos';
-import { Expose, Transform, Type } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { ReadUserDto } from '../../users/dtos';
 
 export class ReadReportDto extends ReadEntityDto {

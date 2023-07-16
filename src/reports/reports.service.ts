@@ -18,4 +18,12 @@ export class ReportsService {
 
     return this.reportRepository.save(report);
   }
+
+  async list() {
+    return await this.reportRepository.find();
+  }
+
+  async get(id: number) {
+    return await this.reportRepository.findOne({ where: { id } });
+  }
 }

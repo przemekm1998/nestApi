@@ -5,21 +5,21 @@ import {
   HttpStatus,
   Body,
   UseGuards,
+  Get,
+  Param,
 } from '@nestjs/common';
-import { CreateReportDto } from './dtos/create-report.dto';
 import { ReportsService } from './reports.service';
 import { JwtApiAuthGuard } from '../auth/jwt-api.auth.guard';
 import { CurrentUser, Serialize } from '../common/decorators';
 import { UserEntity } from '../users/users.entity';
-import { ReportEntity } from './reports.entity';
-import { ReadReportDto } from './dtos/read-report.dto';
+import { ReadReportDto, CreateReportDto, ListReportDto } from './dtos';
 
 @Controller('reports')
+@UseGuards(JwtApiAuthGuard)
 export class ReportsController {
   constructor(private reportsService: ReportsService) {}
 
   @Post()
-  @UseGuards(JwtApiAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   @Serialize(ReadReportDto)
   async createReport(
@@ -27,5 +27,19 @@ export class ReportsController {
     @CurrentUser() user: UserEntity,
   ) {
     return await this.reportsService.create(body, user);
+  }
+
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @Serialize(ListReportDto)
+  async listReports() {
+    return await this.reportsService.list();
+  }
+
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  @Serialize(ReadReportDto)
+  async getReport(@Param('id') id: string) {
+    return await this.reportsService.get(parseInt(id));
   }
 }
