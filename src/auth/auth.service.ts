@@ -6,8 +6,6 @@ import {
   AccessTokenPayloadInterface,
   TokenDataInterface,
 } from './auth.interfaces';
-import { IUser } from '../@types';
-import { ConfigService } from '@nestjs/config';
 import { RefreshTokenPayloadInterface } from './auth.interfaces';
 import { AuthErrors } from './auth.constants';
 import { UserEntity } from '../users/users.entity';
@@ -19,7 +17,10 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<IUser | null> {
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<UserEntity | null> {
     const [user] = await this.userService.find({ email });
     if (!user) {
       return null;
@@ -29,7 +30,7 @@ export class AuthService {
     return isPasswordValid ? user : null;
   }
 
-  generateToken(user: IUser): TokenDataInterface {
+  generateToken(user: UserEntity): TokenDataInterface {
     const accessPayload: AccessTokenPayloadInterface = {
       id: user.id,
       email: user.email,

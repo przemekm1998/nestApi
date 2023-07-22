@@ -62,7 +62,8 @@ describe('ReportsController (e2e)', () => {
       .send(reportData)
       .expect(201)
       .then((res) => {
-        const { id, make, model, year, price, mileage, user } = res.body;
+        const { id, make, model, year, price, mileage, user, approved } =
+          res.body;
 
         expect(id).toBeDefined();
         expect(make).toEqual(reportData.make);
@@ -70,12 +71,13 @@ describe('ReportsController (e2e)', () => {
         expect(year).toEqual(reportData.year);
         expect(price).toEqual(reportData.price);
         expect(mileage).toEqual(reportData.mileage);
+        expect(approved).toEqual(false);
 
         expect(user).toMatchObject({
           id: user.id,
           email: user.email,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
+          createdAt: user.createdAt.toISOString(),
+          updatedAt: user.updatedAt.toISOString(),
         });
       });
   });
@@ -118,8 +120,8 @@ describe('ReportsController (e2e)', () => {
       .expect(200)
       .then((res) => {
         expect(res.body).toMatchObject({
-          createdAt: report.createdAt,
-          updatedAt: report.updatedAt,
+          createdAt: report.createdAt.toISOString(),
+          updatedAt: report.updatedAt.toISOString(),
           id: report.id,
           price: report.price,
           make: report.make,
@@ -128,6 +130,27 @@ describe('ReportsController (e2e)', () => {
           lng: report.lng,
           lat: report.lat,
           mileage: report.mileage,
+          approved: false,
+        });
+      });
+  });
+
+  it('/reports/:id (PATCH) throws error for anonymous user', async () => {
+    return agent.patch('/reports/1').send({ approved: true }).expect(401);
+  });
+
+  it('/reports/:id (PATCH) returns updated report instance', async () => {
+    const report = await reportsService.create(reportData, user);
+
+    agent.auth(authTokens.access, { type: 'bearer' });
+
+    return agent
+      .patch(`/reports/${report.id}`)
+      .send({ approved: true })
+      .expect(200)
+      .then((res) => {
+        expect(res.body).toMatchObject({
+          approved: true,
         });
       });
   });
