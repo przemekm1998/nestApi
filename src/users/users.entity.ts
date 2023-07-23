@@ -13,6 +13,9 @@ export class UserEntity extends BaseEntity {
   @Column()
   password: string;
 
+  @Column({ default: false })
+  isAdmin: boolean;
+
   constructor(partial: Partial<UserEntity>) {
     super();
     Object.assign(this, partial);

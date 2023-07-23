@@ -9,7 +9,6 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { LocalLoginAuthGuard } from './local-login.auth.guard';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dtos';
 import { AuthUtils } from './auth.utils';
@@ -20,7 +19,7 @@ import { UserEntity } from '../users/users.entity';
 import { RefreshTokenPayloadInterface } from './auth.interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { JwtApiAuthGuard } from './jwt-api.auth.guard';
+import { JwtApiAuthGuard, LocalLoginAuthGuard } from './guards';
 import { CurrentUser, Serialize } from '../common/decorators';
 import { ReadUserDto } from '../users/dtos';
 

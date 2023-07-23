@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { UserEntity } from './users.entity';
-import { JwtApiAuthGuard } from '../auth/jwt-api.auth.guard';
+import { JwtApiAuthGuard } from '../auth/guards';
 import { UpdateUserDto, ReadUserDto, ListUserDto } from './dtos';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../common/decorators';

@@ -8,6 +8,8 @@ import { CreateUserDto } from '../../users/dtos';
 import { TokenDataInterface } from '../../auth/auth.interfaces';
 import { ReportsService } from '../reports.service';
 import { UserEntity } from '../../users/users.entity';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 describe('ReportsController (e2e)', () => {
   let app: INestApplication;
@@ -23,6 +25,7 @@ describe('ReportsController (e2e)', () => {
 
   let authService: AuthService;
   let reportsService: ReportsService;
+  let usersRepo: Repository<UserEntity>;
   let authTokens: TokenDataInterface;
 
   const userData: CreateUserDto = {
@@ -40,6 +43,9 @@ describe('ReportsController (e2e)', () => {
 
     authService = moduleFixture.get<AuthService>(AuthService);
     reportsService = moduleFixture.get<ReportsService>(ReportsService);
+    usersRepo = moduleFixture.get<Repository<UserEntity>>(
+      getRepositoryToken(UserEntity),
+    );
 
     user = await authService.signup(userData.email, userData.password);
     authTokens = await authService.generateToken(user);
@@ -76,8 +82,8 @@ describe('ReportsController (e2e)', () => {
         expect(user).toMatchObject({
           id: user.id,
           email: user.email,
-          createdAt: user.createdAt.toISOString(),
-          updatedAt: user.updatedAt.toISOString(),
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
         });
       });
   });
@@ -139,7 +145,7 @@ describe('ReportsController (e2e)', () => {
     return agent.patch('/reports/1').send({ approved: true }).expect(401);
   });
 
-  it('/reports/:id (PATCH) returns updated report instance', async () => {
+  it('/reports/:id (PATCH) throws permissions denied error for non-admin user', async () => {
     const report = await reportsService.create(reportData, user);
 
     agent.auth(authTokens.access, { type: 'bearer' });
@@ -147,9 +153,46 @@ describe('ReportsController (e2e)', () => {
     return agent
       .patch(`/reports/${report.id}`)
       .send({ approved: true })
+      .expect(403)
+      .then((res) => {
+        expect(res.body).toMatchObject({
+          error: 'Forbidden',
+          message: 'Forbidden resource',
+          statusCode: 403,
+        });
+      });
+  });
+
+  it('/reports/:id (PATCH) approves report for admin user', async () => {
+    let report = await reportsService.create(reportData, user);
+    const admin = await usersRepo.create({
+      email: 'admin@admin.com',
+      password: 'password',
+      isAdmin: true,
+    });
+    await usersRepo.save(admin);
+
+    authTokens = await authService.generateToken(admin);
+    agent.auth(authTokens.access, { type: 'bearer' });
+
+    report = await reportsService.get(report.id);
+
+    return agent
+      .patch(`/reports/${report.id}`)
+      .send({ approved: true })
       .expect(200)
       .then((res) => {
         expect(res.body).toMatchObject({
+          createdAt: report.createdAt.toISOString(),
+          updatedAt: report.updatedAt.toISOString(),
+          id: report.id,
+          price: report.price,
+          make: report.make,
+          model: report.model,
+          year: report.year,
+          lng: report.lng,
+          lat: report.lat,
+          mileage: report.mileage,
           approved: true,
         });
       });
