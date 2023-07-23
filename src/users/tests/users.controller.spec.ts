@@ -5,6 +5,7 @@ import { UserEntity } from '../users.entity';
 import { Request } from 'express';
 import { UserMockFactory } from './factories';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { IUser } from '../../@types';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -38,9 +39,8 @@ describe('UsersController', () => {
         password: 'password',
       }),
     );
-    const request = { user: user } as Request;
 
-    const requestUser = controller.me(request);
+    const requestUser = controller.me(user);
 
     expect(requestUser.id).toEqual(user.id);
   });
@@ -52,7 +52,7 @@ describe('UsersController', () => {
         password: 'password',
       }),
     );
-    const request = { user: user } as Request;
+    const request = { user: user as IUser } as Request;
     const newMail = 'newmail@mail.com';
 
     const updatedUser = await controller.update(request, { email: newMail });

@@ -9,7 +9,6 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { LocalLoginAuthGuard } from './local-login.auth.guard';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dtos';
 import { AuthUtils } from './auth.utils';
@@ -20,8 +19,8 @@ import { UserEntity } from '../users/users.entity';
 import { RefreshTokenPayloadInterface } from './auth.interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { JwtApiAuthGuard } from './jwt-api.auth.guard';
-import { Serialize } from '../common/decorators';
+import { JwtApiAuthGuard, LocalLoginAuthGuard } from './guards';
+import { CurrentUser, Serialize } from '../common/decorators';
 import { ReadUserDto } from '../users/dtos';
 
 @Controller('auth')
@@ -36,8 +35,11 @@ export class AuthController {
   @Post('login')
   @HttpCode(200)
   @UseGuards(LocalLoginAuthGuard)
-  login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const tokenData = this.authService.generateToken(req.user);
+  login(
+    @CurrentUser() user: UserEntity,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const tokenData = this.authService.generateToken(user);
     this.authUtils.setAuthCookies(res, tokenData);
 
     return tokenData;

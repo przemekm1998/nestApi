@@ -4,4 +4,7 @@ import { ReadEntityDto } from '../../common/dtos';
 export class ReadUserDto extends ReadEntityDto {
   @Expose()
   email: string;
+
+  @Expose()
+  isAdmin: boolean;
 }

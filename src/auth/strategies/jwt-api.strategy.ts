@@ -1,14 +1,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, JwtFromRequestFunction, Strategy } from 'passport-jwt';
-import { AuthService } from './auth.service';
-import { AccessTokenPayloadInterface } from './auth.interfaces';
+import { AccessTokenPayloadInterface } from '../auth.interfaces';
 import { ConfigService } from '@nestjs/config';
-import { AuthConfigInterface } from '../configuration/interfaces';
-import { IUser } from '../@types';
+import { AuthConfigInterface } from '../../configuration/interfaces';
 import { Request } from 'express';
-import * as jwtConstants from './auth.constants';
-import { UsersService } from '../users/users.service';
+import * as jwtConstants from '../auth.constants';
+import { UsersService } from '../../users/users.service';
+import { UserEntity } from '../../users/users.entity';
 
 function jwtCookieExtractor(): JwtFromRequestFunction {
   return (req: Request): string | null => {
@@ -41,7 +40,7 @@ export class JwtApiStrategy extends PassportStrategy(Strategy, 'jwtApi') {
     });
   }
 
-  async validate(payload: AccessTokenPayloadInterface): Promise<IUser> {
+  async validate(payload: AccessTokenPayloadInterface): Promise<UserEntity> {
     const user = await this.usersService.findOne(payload.id);
     if (!user) {
       throw new UnauthorizedException();

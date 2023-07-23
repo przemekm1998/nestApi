@@ -8,3 +8,6 @@ down:
 
 shell:
 	$(DOCKER_COMPOSE) run backend bash
+
+build:
+	$(DOCKER_COMPOSE) build backend

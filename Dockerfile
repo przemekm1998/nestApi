@@ -1,12 +1,12 @@
 FROM node:18 as builder
 
 RUN apt-get update && \
-  npm i -g npm@^8 pnpm@^7.25.0 && \
+  npm i -g npm@^8 && \
   rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-COPY package.json pnpm*.yaml ./
+COPY package.json yarn.lock ./
 RUN yarn
 
 COPY . .

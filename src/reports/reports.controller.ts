@@ -7,12 +7,22 @@ import {
   UseGuards,
   Get,
   Param,
+  Patch,
+  Query,
 } from '@nestjs/common';
 import { ReportsService } from './reports.service';
-import { JwtApiAuthGuard } from '../auth/jwt-api.auth.guard';
+import { JwtApiAuthGuard } from '../auth/guards';
 import { CurrentUser, Serialize } from '../common/decorators';
 import { UserEntity } from '../users/users.entity';
-import { ReadReportDto, CreateReportDto, ListReportDto } from './dtos';
+import {
+  ReadReportDto,
+  CreateReportDto,
+  ListReportDto,
+  ApproveReportDto,
+  GetEstimateDto,
+} from './dtos';
+import {} from './dtos';
+import { AdminGuard } from '../users/guards/admin.guard';
 
 @Controller('reports')
 @UseGuards(JwtApiAuthGuard)
@@ -41,5 +51,24 @@ export class ReportsController {
   @Serialize(ReadReportDto)
   async getReport(@Param('id') id: string) {
     return await this.reportsService.get(parseInt(id));
+  }
+
+  @Patch(':id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AdminGuard)
+  @Serialize(ReadReportDto)
+  async approveReport(@Param('id') id: string, @Body() body: ApproveReportDto) {
+    return await this.reportsService.changeApproval(
+      parseInt(id),
+      body.approved,
+    );
+  }
+
+  @Get('estimate')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtApiAuthGuard)
+  async getEstimate(@Query() query: GetEstimateDto) {
+    console.log(query);
+    // return await this.reportsService.getEstimate(query);
   }
 }

@@ -28,6 +28,9 @@ export class ReportEntity extends BaseEntity {
   @Column()
   mileage: number;
 
+  @Column({ default: false })
+  approved: boolean;
+
   constructor(partial: Partial<ReportEntity>) {
     super();
     Object.assign(this, partial);

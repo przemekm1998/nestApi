@@ -33,4 +33,7 @@ export class ReadReportDto extends ReadEntityDto {
   @Expose()
   @Type(() => ReadUserDto)
   user: ReadUserDto;
+
+  @Expose()
+  approved: boolean;
 }
