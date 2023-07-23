@@ -21,7 +21,6 @@ import {
   ApproveReportDto,
   GetEstimateDto,
 } from './dtos';
-import {} from './dtos';
 import { AdminGuard } from '../users/guards/admin.guard';
 
 @Controller('reports')
@@ -68,7 +67,6 @@ export class ReportsController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtApiAuthGuard)
   async getEstimate(@Query() query: GetEstimateDto) {
-    console.log(query);
-    // return await this.reportsService.getEstimate(query);
+    return await this.reportsService.createEstimate(query);
   }
 }
